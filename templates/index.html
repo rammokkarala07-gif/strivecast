@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Sport & Fitness AI Advisor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.75)), url('/static/background.jpg');
+            background-color: #0d161d;
+            background-size: cover; background-position: center; background-attachment: fixed;
+            min-height: 100vh; color: #ffffff; padding: 24px;
+        }
+        .container { max-width: 1150px; margin: 0 auto; }
+        
+        .navbar {
+            background: rgba(13, 22, 29, 0.70); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 16px; padding: 16px 24px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+        }
+        .brand { font-size: 19px; font-weight: 800; color: #00f0ff; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        .user-panel { display: flex; align-items: center; gap: 16px; font-size: 13px; }
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.25); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5;
+            padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 12px; text-decoration: none; transition: 0.2s;
+        }
+        .btn-logout:hover { background: rgba(239, 68, 68, 0.45); color: #fff; }
+
+        .nav-tabs { display: flex; gap: 12px; margin-bottom: 20px; }
+        .nav-tab-btn {
+            background: rgba(13, 22, 29, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); color: #94a3b8;
+            padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s;
+        }
+        .nav-tab-btn.active { background: linear-gradient(135deg, #10b981, #059669); color: #fff; border-color: transparent; }
+
+        .layout-grid { display: grid; grid-template-columns: 360px 1fr; gap: 24px; }
+        @media (max-width: 900px) { .layout-grid { grid-template-columns: 1fr; } }
+
+        .card {
+            background: rgba(13, 22, 29, 0.65); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 16px; padding: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); margin-bottom: 20px;
+        }
+        .card-title { font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .form-group select, .form-group input[type="number"] {
+            width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff; padding: 11px; border-radius: 8px; outline: none; font-size: 13px;
+        }
+        .slider-wrapper { display: flex; align-items: center; gap: 12px; }
+        .slider-wrapper input[type="range"] { flex: 1; accent-color: #10b981; }
+        .fatigue-val { font-size: 14px; font-weight: 800; color: #00f0ff; width: 30px; }
+
+        .btn-action {
+            width: 100%; padding: 13px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff;
+            border: none; border-radius: 8px; font-weight: 800; font-size: 13px; letter-spacing: 0.5px; cursor: pointer; transition: 0.2s; margin-top: 6px;
+        }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
+
+        .weather-card {
+            background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(0, 240, 255, 0.25);
+            border-radius: 14px; padding: 16px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .weather-info { display: flex; align-items: center; gap: 14px; }
+        .weather-icon { font-size: 28px; color: #00f0ff; }
+        .weather-temp { font-size: 24px; font-weight: 800; color: #ffffff; }
+        .weather-sub { font-size: 11px; color: #94a3b8; }
+        .weather-badge {
+            background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 12px;
+        }
+
+        .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .metric-card { background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 18px; }
+        .metric-label { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+        .metric-value { font-size: 28px; font-weight: 800; color: #ffffff; }
+
+        .advice-header { font-size: 18px; font-weight: 800; color: #00f0ff; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+        .advice-text { font-size: 14px; line-height: 1.6; color: #e2e8f0; margin-bottom: 16px; }
+        .advice-pill {
+            display: inline-block; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.2);
+            color: #38bdf8; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; margin-right: 8px; margin-bottom: 8px;
+        }
+        .nutrition-box { background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 13px; color: #a7f3d0; margin-top: 16px; }
+
+        .history-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        .history-table th { background: rgba(15, 23, 42, 0.8); color: #94a3b8; padding: 12px; font-weight: 700; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .history-table td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: #e2e8f0; }
+
+        /* Auth Styles */
+        .auth-container { width: 100%; max-width: 420px; margin: 0 auto; }
+        .auth-box {
+            background: rgba(13, 22, 29, 0.65); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 16px; padding: 36px 28px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+        }
+        .auth-box h2 { font-size: 24px; font-weight: 800; margin-bottom: 6px; color: #ffffff; }
+        .auth-box p { color: #cbd5e1; font-size: 13px; margin-bottom: 24px; }
+        .auth-tabs { display: flex; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 4px; margin-bottom: 24px; }
+        .tab-btn { flex: 1; background: transparent; border: none; color: #94a3b8; font-size: 11px; font-weight: 700; padding: 10px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active { background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; }
+        .input-group { position: relative; margin-bottom: 16px; text-align: left; }
+        .input-group label { display: block; font-size: 10px; font-weight: 700; color: #94a3b8; margin-bottom: 6px; }
+        .input-group input { width: 100%; background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 12px 40px; border-radius: 8px; outline: none; }
+        .input-group .icon-left { position: absolute; left: 14px; top: 32px; color: #64748b; }
+        .submit-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; padding: 10px; border-radius: 8px; margin-bottom: 16px; font-size: 12px; }
+        .alert-success { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16,185,129,0.4); color: #6ee7b7; padding: 10px; border-radius: 8px; margin-bottom: 16px; font-size: 12px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    {% if session.get('user') %}
+    <!-- LOGGED IN DASHBOARD -->
+    <div class="container">
+        <nav class="navbar">
+            <div class="brand">
+                <i class="fa-solid fa-bolt"></i> MULTI-SPORT AI ADVISOR
+            </div>
+            <div class="user-panel">
+                <span><i class="fa-regular fa-user" style="color: #10b981;"></i> {{ session['user'] }}</span>
+                <a href="/logout" class="btn-logout">LOG OUT</a>
+            </div>
+        </nav>
+
+        <div class="nav-tabs">
+            <button class="nav-tab-btn active" onclick="switchView('advisor')"><i class="fa-solid fa-sliders"></i> Training Advisor</button>
+            <button class="nav-tab-btn" onclick="switchView('recovery')"><i class="fa-solid fa-spa"></i> AI Recovery Studio</button>
+            <button class="nav-tab-btn" onclick="switchView('history')"><i class="fa-solid fa-clock-rotate-left"></i> Activity History</button>
+        </div>
+
+        <!-- 1. TRAINING ADVISOR VIEW -->
+        <div id="view-advisor">
+            <div class="layout-grid">
+                <div>
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fa-solid fa-sliders" style="color: #10b981;"></i> Training Telemetry
+                        </div>
+
+                        <div class="form-group">
+                            <label>Select Sport Discipline</label>
+                            <select id="sport">
+                                <option value="cycling" selected>Outdoor / Indoor Cycling</option>
+                                <option value="running">Running (Road / Track / Trail)</option>
+                                <option value="strength">Strength & Resistance</option>
+                                <option value="hiit">HIIT & Cardio</option>
+                                <option value="calisthenics">Calisthenics & Bodyweight</option>
+                                <option value="swimming">Swimming & Aquatics</option>
+                                <option value="combat">Combat Sports & Martial Arts</option>
+                                <option value="team_sports">Team & Field Sports</option>
+                                <option value="yoga">Yoga, Mobility & Pilates</option>
+                            </select>
+                        </div>
+
+                        <!-- Editable Temperature Input -->
+                        <div class="form-group">
+                            <label style="display: flex; justify-content: space-between;">
+                                <span>Temperature (°C)</span>
+                                <span style="color: #00f0ff; cursor: pointer;" onclick="syncLiveTemp()"><i class="fa-solid fa-rotate"></i> Reset to Live</span>
+                            </label>
+                            <input type="number" id="custom_temp" placeholder="Auto-fetching Hyderabad temp..." step="0.5">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Target Duration (Minutes)</label>
+                            <input type="number" id="duration" value="45" min="10" max="240">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Planned Intensity</label>
+                            <select id="intensity">
+                                <option value="Low">Low / Recovery</option>
+                                <option value="Moderate" selected>Moderate / Endurance</option>
+                                <option value="High">High / Threshold</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Fatigue Level (1-10)</label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="fatigue" min="1" max="10" value="3" oninput="document.getElementById('fatigue-val').innerText = this.value">
+                                <span id="fatigue-val" class="fatigue-val">3</span>
+                            </div>
+                        </div>
+
+                        <button class="btn-action" onclick="getAIAdvice()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> GENERATE AI ADVICE
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <!-- Hyderabad Live Weather Card -->
+                    <div class="card" style="padding: 16px;">
+                        <div class="weather-card">
+                            <div class="weather-info">
+                                <i class="fa-solid fa-cloud-sun weather-icon" id="w-icon"></i>
+                                <div>
+                                    <div class="weather-temp" id="w-temp">--°C</div>
+                                    <div class="weather-sub">Hyderabad • <span id="w-cond">Loading live weather...</span></div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="weather-badge" id="w-status">Live Data</span>
+                                <div class="weather-sub" style="margin-top: 6px;">Wind: <strong id="w-wind" style="color: #fff;">-- km/h</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metrics-row">
+                        <div class="metric-card">
+                            <div class="metric-label">Readiness Score</div>
+                            <div id="readiness-score" class="metric-value" style="color: #10b981;">73%</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Overexertion Risk</div>
+                            <div id="risk-badge" class="metric-value" style="color: #10b981;">Low</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div id="advice-output">
+                            <div class="advice-header">
+                                <i class="fa-solid fa-robot"></i> <span id="advice-title">Cycling Telemetry Advisory</span>
+                            </div>
+
+                            <div id="advice-pills">
+                                <span class="advice-pill" id="pill-stat">Target Cadence: 85 - 95 RPM</span>
+                                <span class="advice-pill" id="pill-hr">Zone 2-3 (Endurance)</span>
+                            </div>
+
+                            <p class="advice-text" id="advice-insight">
+                                Click <strong>Generate AI Advice</strong> to compute readiness scores and sport-specific training guidelines.
+                            </p>
+
+                            <div class="nutrition-box" id="advice-nutrition">
+                                <i class="fa-solid fa-apple-whole"></i> <strong>Nutrition & Recovery:</strong> Hydrate regularly based on intensity.
+                            </div>
+
+                            <div style="margin-top: 16px; display: flex; gap: 10px;">
+                                <button class="btn-action" style="background: rgba(0, 240, 255, 0.2); border: 1px solid rgba(0, 240, 255, 0.4); color: #38bdf8;" onclick="logCurrentSession()">
+                                    <i class="fa-solid fa-plus"></i> LOG WORKOUT TO HISTORY
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: #00f0ff;"></i> Target Heart Rate Distribution</div>
+                        <div style="height: 180px;">
+                            <canvas id="hrChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. AI RECOVERY STUDIO VIEW -->
+        <div id="view-recovery" class="hidden">
+            <div class="layout-grid">
+                <div>
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fa-solid fa-bed" style="color: #38bdf8;"></i> Recovery Parameters
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sleep Duration (Hours)</label>
+                            <input type="number" id="sleep_hours" value="7.5" step="0.5" min="3" max="12">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sleep Quality</label>
+                            <select id="sleep_quality">
+                                <option value="Poor">Poor / Restless</option>
+                                <option value="Average">Average</option>
+                                <option value="Good" selected>Good / Restorative</option>
+                                <option value="Excellent">Excellent</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Muscular Soreness (1-10)</label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="soreness" min="1" max="10" value="4" oninput="document.getElementById('soreness-val').innerText = this.value">
+                                <span id="soreness-val" class="fatigue-val">4</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>CNS Strain Level (1-10)</label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="cns_strain" min="1" max="10" value="3" oninput="document.getElementById('cns-val').innerText = this.value">
+                                <span id="cns-val" class="fatigue-val">3</span>
+                            </div>
+                        </div>
+
+                        <button class="btn-action" style="background: linear-gradient(135deg, #0284c7, #0369a1);" onclick="getAIRecovery()">
+                            <i class="fa-solid fa-brain"></i> ANALYZE CNS RECOVERY
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="metrics-row">
+                        <div class="metric-card">
+                            <div class="metric-label">CNS Recovery Index</div>
+                            <div id="rec-score" class="metric-value" style="color: #10b981;">82%</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Recovery Status</div>
+                            <div id="rec-status" class="metric-value" style="font-size: 20px; color: #10b981;">Optimal</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="advice-header"><i class="fa-solid fa-notes-medical"></i> AI Active Recovery Protocol</div>
+                        <p class="advice-text" id="rec-protocol">
+                            Calculated CNS index indicates full neural readiness for intense training effort.
+                        </p>
+                        <div class="nutrition-box" id="rec-actions" style="background: rgba(2, 132, 199, 0.15); border-left-color: #38bdf8; color: #bae6fd;">
+                            <i class="fa-solid fa-list-check"></i> <strong>Recommended Actions:</strong> Dynamic mobility, standard hydration protocol.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. ACTIVITY HISTORY LOG VIEW -->
+        <div id="view-history" class="hidden">
+            <div class="card">
+                <div class="card-title" style="justify-content: space-between;">
+                    <span><i class="fa-solid fa-clock-rotate-left" style="color: #10b981;"></i> Session Log History</span>
+                    <button class="btn-action" style="width: auto; padding: 6px 14px; font-size: 11px;" onclick="fetchLogs()">
+                        <i class="fa-solid fa-rotate-right"></i> Refresh Logs
+                    </button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Sport Discipline</th>
+                                <th>Duration</th>
+                                <th>Intensity</th>
+                                <th>Readiness</th>
+                                <th>Risk Level</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: #94a3b8;">No workout logs recorded yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let hrChartInstance = null;
+        let liveHydTemp = 28.0;
+
+        function switchView(viewName) {
+            document.getElementById('view-advisor').classList.add('hidden');
+            document.getElementById('view-recovery').classList.add('hidden');
+            document.getElementById('view-history').classList.add('hidden');
+            
+            const btns = document.querySelectorAll('.nav-tab-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+
+            if (viewName === 'advisor') {
+                document.getElementById('view-advisor').classList.remove('hidden');
+                btns[0].classList.add('active');
+            } else if (viewName === 'recovery') {
+                document.getElementById('view-recovery').classList.remove('hidden');
+                btns[1].classList.add('active');
+            } else if (viewName === 'history') {
+                document.getElementById('view-history').classList.remove('hidden');
+                btns[2].classList.add('active');
+                fetchLogs();
+            }
+        }
+
+        async function fetchLiveWeather() {
+            try {
+                const res = await fetch('/api/weather');
+                const w = await res.json();
+                
+                document.getElementById('w-temp').innerText = w.temp;
+                document.getElementById('w-cond').innerText = w.condition;
+                document.getElementById('w-wind').innerText = w.wind;
+                document.getElementById('w-status').innerText = w.status;
+                
+                liveHydTemp = w.raw_temp;
+                
+                // Set editable temp input to live temperature if blank
+                const customInput = document.getElementById('custom_temp');
+                if (!customInput.value) {
+                    customInput.value = liveHydTemp;
+                }
+            } catch (e) {
+                console.error("Error fetching live weather:", e);
+            }
+        }
+
+        function syncLiveTemp() {
+            document.getElementById('custom_temp').value = liveHydTemp;
+            getAIAdvice();
+        }
+
+        async function getAIAdvice() {
+            const sport = document.getElementById('sport').value;
+            const custom_temp = document.getElementById('custom_temp').value;
+            const duration = document.getElementById('duration').value;
+            const intensity = document.getElementById('intensity').value;
+            const fatigue = document.getElementById('fatigue').value;
+
+            try {
+                const response = await fetch('/api/advisor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sport, custom_temp, duration, intensity, fatigue })
+                });
+
+                const data = await response.json();
+
+                document.getElementById('readiness-score').innerText = data.readiness_score;
+                const riskElem = document.getElementById('risk-badge');
+                riskElem.innerText = data.overexertion_risk;
+                riskElem.style.color = data.risk_color;
+
+                const advice = data.advice;
+                document.getElementById('advice-title').innerText = advice.title;
+                document.getElementById('pill-stat').innerText = `${advice.stat_label}: ${advice.stat_val}`;
+                document.getElementById('pill-hr').innerText = advice.hr_zone;
+                document.getElementById('advice-insight').innerText = advice.ai_insight;
+                document.getElementById('advice-nutrition').innerHTML = `<i class="fa-solid fa-apple-whole"></i> <strong>Nutrition & Recovery:</strong> ${advice.nutrition_tip}`;
+
+                renderHRChart(data.hr_zones);
+            } catch (err) {
+                console.error("Error fetching AI advice:", err);
+            }
+        }
+
+        async function getAIRecovery() {
+            const sleep_hours = document.getElementById('sleep_hours').value;
+            const sleep_quality = document.getElementById('sleep_quality').value;
+            const soreness = document.getElementById('soreness').value;
+            const cns_strain = document.getElementById('cns_strain').value;
+
+            try {
+                const res = await fetch('/api/recovery', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sleep_hours, sleep_quality, soreness, cns_strain })
+                });
+
+                const data = await res.json();
+                document.getElementById('rec-score').innerText = data.recovery_index;
+                const statusElem = document.getElementById('rec-status');
+                statusElem.innerText = data.status;
+                statusElem.style.color = data.status_color;
+                document.getElementById('rec-protocol').innerText = data.protocol;
+                document.getElementById('rec-actions').innerHTML = `<i class="fa-solid fa-list-check"></i> <strong>Recommended Actions:</strong> ${data.actions.join(' • ')}`;
+            } catch (e) {
+                console.error("Error fetching recovery:", e);
+            }
+        }
+
+        async function logCurrentSession() {
+            const sport = document.getElementById('sport').value;
+            const duration = document.getElementById('duration').value;
+            const intensity = document.getElementById('intensity').value;
+            const readiness = document.getElementById('readiness-score').innerText;
+            const risk = document.getElementById('risk-badge').innerText;
+
+            try {
+                const res = await fetch('/api/logs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sport, duration, intensity, readiness, risk, notes: "Logged via AI Advisor HUD" })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Workout session logged successfully!");
+                }
+            } catch (e) {
+                console.error("Error logging workout:", e);
+            }
+        }
+
+        async function fetchLogs() {
+            try {
+                const res = await fetch('/api/logs');
+                const data = await res.json();
+                const tbody = document.getElementById('history-tbody');
+                tbody.innerHTML = '';
+
+                if (!data.logs || data.logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #94a3b8;">No workout logs recorded yet.</td></tr>';
+                    return;
+                }
+
+                data.logs.forEach(log => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${log.date}</td>
+                        <td><strong>${log.sport}</strong></td>
+                        <td>${log.duration}</td>
+                        <td>${log.intensity}</td>
+                        <td><span style="color: #10b981; font-weight: 700;">${log.readiness}</span></td>
+                        <td><span style="color: ${log.risk === 'High' ? '#ef4444' : log.risk === 'Moderate' ? '#f59e0b' : '#10b981'}; font-weight: 700;">${log.risk}</span></td>
+                        <td>${log.notes}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Error fetching logs:", e);
+            }
+        }
+
+        function renderHRChart(zones) {
+            const ctx = document.getElementById('hrChart').getContext('2d');
+            if (hrChartInstance) hrChartInstance.destroy();
+
+            hrChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Zone 1 (Warmup)', 'Zone 2 (Base)', 'Zone 3 (Tempo)', 'Zone 4 (Threshold)', 'Zone 5 (Anaerobic)'],
+                    datasets: [{
+                        label: '% Time in HR Zone',
+                        data: zones || [15, 35, 30, 15, 5],
+                        backgroundColor: ['#38bdf8', '#10b981', '#f59e0b', '#f97316', '#ef4444'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        fetchLiveWeather().then(() => getAIAdvice());
+    </script>
+
+    {% else %}
+    <!-- AUTHENTICATION VIEW -->
+    <div class="auth-container">
+        <div class="auth-box">
+            <div style="color: #00f0ff; font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px;">
+                <i class="fa-solid fa-bolt"></i> FITNESS AI SECURITY HUD
+            </div>
+            <h2>Athlete Portal Access</h2>
+            <p>AI-Driven Overexertion Prevention Engine</p>
+
+            {% if error %}<div class="alert-error">{{ error }}</div>{% endif %}
+            {% if success %}<div class="alert-success">{{ success }}</div>{% endif %}
+
+            <div class="auth-tabs">
+                <button id="tab-login" class="tab-btn" onclick="switchAuthTab('login')">LOG IN</button>
+                <button id="tab-register" class="tab-btn" onclick="switchAuthTab('register')">CREATE ACCOUNT</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="form-login" action="/login" method="POST">
+                <div class="input-group">
+                    <label>EMAIL</label>
+                    <i class="fa-regular fa-envelope icon-left"></i>
+                    <input type="email" name="email" placeholder="name@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label>PASSWORD</label>
+                    <i class="fa-solid fa-lock icon-left"></i>
+                    <input type="password" id="login-pass" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="submit-btn">LOG IN</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="form-register" action="/register" method="POST" class="hidden">
+                <div class="input-group">
+                    <label>EMAIL</label>
+                    <i class="fa-regular fa-envelope icon-left"></i>
+                    <input type="email" name="email" placeholder="name@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label>CREATE PASSWORD</label>
+                    <i class="fa-solid fa-lock icon-left"></i>
+                    <input type="password" id="reg-pass" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="submit-btn">CREATE ACCOUNT</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const activeTab = "{{ active_tab|default('login') }}";
+        
+        function switchAuthTab(tab) {
+            if (tab === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-register').classList.add('hidden');
+                document.getElementById('tab-login').classList.add('active');
+                document.getElementById('tab-register').classList.remove('active');
+            } else {
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-register').classList.remove('hidden');
+                document.getElementById('tab-login').classList.remove('active');
+                document.getElementById('tab-register').classList.add('active');
+            }
+        }
+
+        switchAuthTab(activeTab);
+    </script>
+    {% endif %}
+
+</body>
+</html>
