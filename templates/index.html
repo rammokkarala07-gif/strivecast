@@ -1,1140 +1,1115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StriveCast - Multi-Sport & Fitness AI Advisor</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>StriveCast - Multi-Sport AI Advisor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.75)), url('/static/background.jpg');
+            background-color: #0d161d;
+            background-size: cover; background-position: center; background-attachment: fixed;
+            min-height: 100vh; color: #ffffff; padding: 24px;
+        }
+        .container { max-width: 1150px; margin: 0 auto; }
+        
+        .navbar {
+            background: rgba(13, 22, 29, 0.70); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 16px; padding: 16px 24px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+        }
+        .brand { font-size: 19px; font-weight: 800; color: #00f0ff; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        .user-panel { display: flex; align-items: center; gap: 16px; font-size: 13px; }
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.25); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5;
+            padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 12px; text-decoration: none; transition: 0.2s;
+        }
+        .btn-logout:hover { background: rgba(239, 68, 68, 0.45); color: #fff; }
 
-    body {
-      background: radial-gradient(circle at top right, #132a3a 0%, #0d161d 55%, #080e13 100%);
-      background-color: #0d161d;
-      background-attachment: fixed;
-      min-height: 100vh;
-      color: #ffffff;
-      padding: 20px;
-      line-height: 1.5;
-    }
+        .nav-tabs { display: flex; gap: 12px; margin-bottom: 20px; }
+        .nav-tab-btn {
+            background: rgba(13, 22, 29, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); color: #94a3b8;
+            padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s;
+        }
+        .nav-tab-btn.active { background: linear-gradient(135deg, #10b981, #059669); color: #fff; border-color: transparent; }
 
-    .container {
-      max-width: 1150px;
-      margin: 0 auto;
-    }
+        .layout-grid { display: grid; grid-template-columns: 360px 1fr; gap: 24px; }
+        @media (max-width: 900px) { .layout-grid { grid-template-columns: 1fr; } }
 
-    /* Glass Card Base */
-    .glass-card {
-      background: rgba(13, 22, 29, 0.75);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.13);
-      border-radius: 16px;
-      padding: 22px 24px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-      margin-bottom: 22px;
-    }
+        .card {
+            background: rgba(13, 22, 29, 0.65); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 16px; padding: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); margin-bottom: 20px;
+        }
+        .card-title { font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
 
-    /* Navbar */
-    .navbar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      padding: 16px 24px;
-    }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .form-group select, .form-group input[type="number"] {
+            width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff; padding: 11px; border-radius: 8px; outline: none; font-size: 13px;
+        }
+        .slider-wrapper { display: flex; align-items: center; gap: 12px; }
+        .slider-wrapper input[type="range"] { flex: 1; accent-color: #10b981; }
+        .fatigue-val { font-size: 14px; font-weight: 800; color: #00f0ff; width: 30px; }
 
-    .brand {
-      font-size: 1.4rem;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #ffffff;
-    }
+        .btn-action {
+            width: 100%; padding: 13px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff;
+            border: none; border-radius: 8px; font-weight: 800; font-size: 13px; letter-spacing: 0.5px; cursor: pointer; transition: 0.2s; margin-top: 6px;
+        }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
 
-    .brand i {
-      color: #38bdf8;
-      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
-    }
+        .weather-card {
+            background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(0, 240, 255, 0.25);
+            border-radius: 14px; padding: 16px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .weather-info { display: flex; align-items: center; gap: 14px; }
+        .weather-icon { font-size: 28px; color: #00f0ff; }
+        .weather-temp { font-size: 24px; font-weight: 800; color: #ffffff; }
+        .weather-sub { font-size: 11px; color: #94a3b8; }
+        .weather-badge {
+            background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 12px;
+        }
 
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+        .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .metric-card { background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 18px; }
+        .metric-label { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+        .metric-value { font-size: 28px; font-weight: 800; color: #ffffff; }
 
-    .weather-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(56, 189, 248, 0.14);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 8px 14px;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      color: #bae6fd;
-      font-weight: 600;
-    }
+        .advice-header { font-size: 18px; font-weight: 800; color: #00f0ff; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+        .advice-text { font-size: 14px; line-height: 1.6; color: #e2e8f0; margin-bottom: 16px; }
+        .advice-pill {
+            display: inline-block; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.2);
+            color: #38bdf8; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; margin-right: 8px; margin-bottom: 8px;
+        }
+        .nutrition-box { background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 13px; color: #a7f3d0; margin-top: 16px; }
 
-    /* Section Headings */
-    .section-header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
+        .history-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        .history-table th { background: rgba(15, 23, 42, 0.8); color: #94a3b8; padding: 12px; font-weight: 700; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .history-table td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: #e2e8f0; }
 
-    .section-header h2 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #f8fafc;
-    }
-
-    .section-header h2 i {
-      color: #38bdf8;
-    }
-
-    .section-sub {
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.68);
-    }
-
-    /* Form Controls */
-    .input-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.8);
-      margin-bottom: 6px;
-    }
-
-    .form-group input,
-    .form-group select {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 10px;
-      padding: 11px 14px;
-      color: #ffffff;
-      font-size: 0.94rem;
-      outline: none;
-      transition: border-color 0.2s ease, background 0.2s ease;
-    }
-
-    .form-group select option {
-      background: #0f1b24;
-      color: #ffffff;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-      border-color: #38bdf8;
-      background: rgba(56, 189, 248, 0.1);
-    }
-
-    .primary-btn {
-      background: linear-gradient(135deg, #0284c7, #10b981);
-      color: #ffffff;
-      border: none;
-      border-radius: 12px;
-      padding: 13px 22px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .primary-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 26px rgba(16, 185, 129, 0.45);
-    }
-
-    /* Telemetry KPI Strip */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 22px;
-    }
-
-    .kpi-card {
-      background: rgba(13, 22, 29, 0.75);
-      backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 16px;
-      padding: 18px 20px;
-    }
-
-    .kpi-label {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: rgba(255, 255, 255, 0.65);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .kpi-value {
-      font-size: 1.55rem;
-      font-weight: 800;
-      color: #ffffff;
-      margin-bottom: 4px;
-    }
-
-    .kpi-note {
-      font-size: 0.82rem;
-      color: #7dd3fc;
-    }
-
-    /* Two-Column Protocol & Nutrition Layout */
-    .two-col-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 22px;
-      margin-bottom: 22px;
-    }
-
-    .protocol-step {
-      background: rgba(255, 255, 255, 0.04);
-      border-left: 3px solid #38bdf8;
-      border-radius: 0 10px 10px 0;
-      padding: 12px 14px;
-      margin-bottom: 12px;
-    }
-
-    .protocol-step strong {
-      display: block;
-      font-size: 0.92rem;
-      color: #7dd3fc;
-      margin-bottom: 3px;
-    }
-
-    .protocol-step p {
-      font-size: 0.86rem;
-      color: rgba(255, 255, 255, 0.82);
-    }
-
-    .guardrail-box {
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.35);
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 0.85rem;
-      color: #fde68a;
-      margin-top: 10px;
-    }
-
-    /* Nutrition Macro Pills */
-    .macro-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .macro-box {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-    }
-
-    .macro-box span {
-      display: block;
-      font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.65);
-      text-transform: uppercase;
-    }
-
-    .macro-box strong {
-      font-size: 1.2rem;
-      color: #34d399;
-    }
-
-    .meal-tip {
-      background: rgba(16, 185, 129, 0.09);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      border-radius: 10px;
-      padding: 11px 14px;
-      margin-bottom: 10px;
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.86);
-    }
-
-    .meal-tip strong {
-      color: #6ee7b7;
-    }
-
-    /* Hyderabad Tracks & Groups Module */
-    .hyd-card-border {
-      border: 1px solid rgba(56, 189, 248, 0.32);
-    }
-
-    .sc-hyd-tabs {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .sc-hyd-tab {
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      color: rgba(255, 255, 255, 0.88);
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 0.84rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .sc-hyd-tab:hover {
-      background: rgba(56, 189, 248, 0.18);
-      border-color: #38bdf8;
-    }
-
-    .sc-hyd-tab.active {
-      background: linear-gradient(135deg, #0284c7, #10b981);
-      border-color: transparent;
-      color: #ffffff;
-    }
-
-    .sc-hyd-section-title {
-      font-size: 0.88rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #10b981;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 700;
-    }
-
-    .sc-hyd-item {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 14px 16px;
-      margin-bottom: 12px;
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-
-    .sc-hyd-item:hover {
-      transform: translateY(-2px);
-      border-color: rgba(56, 189, 248, 0.45);
-    }
-
-    .sc-hyd-item-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-
-    .sc-hyd-item-top strong {
-      font-size: 0.96rem;
-      color: #f8fafc;
-    }
-
-    .sc-hyd-badge {
-      font-size: 0.72rem;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: rgba(56, 189, 248, 0.18);
-      color: #7dd3fc;
-      white-space: nowrap;
-    }
-
-    .sc-hyd-item p {
-      font-size: 0.84rem;
-      color: rgba(255, 255, 255, 0.76);
-      margin-bottom: 9px;
-    }
-
-    .sc-hyd-pin-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #38bdf8;
-      text-decoration: none;
-    }
-
-    .sc-hyd-pin-link:hover {
-      text-decoration: underline;
-      color: #7dd3fc;
-    }
-
-    .sc-hyd-map-cta {
-      margin-top: 14px;
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .sc-hyd-map-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.92rem;
-      padding: 12px 20px;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .sc-hyd-map-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
-    }
-
-    /* Chart Container */
-    .chart-wrapper {
-      position: relative;
-      height: 260px;
-      width: 100%;
-    }
-
-    .log-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      margin-top: 16px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .secondary-btn {
-      background: rgba(56, 189, 248, 0.16);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      color: #7dd3fc;
-      padding: 10px 16px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.86rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.2s ease;
-    }
-
-    .secondary-btn:hover {
-      background: rgba(56, 189, 248, 0.28);
-    }
-
-    @media (max-width: 640px) {
-      body { padding: 12px; }
-      .glass-card { padding: 16px; }
-      .sc-hyd-map-btn { width: 100%; justify-content: center; }
-    }
-  </style>
+        /* Auth Styles */
+        .auth-container { width: 100%; max-width: 420px; margin: 0 auto; }
+        .auth-box {
+            background: rgba(13, 22, 29, 0.65); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 16px; padding: 36px 28px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+        }
+        .auth-box h2 { font-size: 24px; font-weight: 800; margin-bottom: 6px; color: #ffffff; }
+        .auth-box p { color: #cbd5e1; font-size: 13px; margin-bottom: 24px; }
+        .auth-tabs { display: flex; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 4px; margin-bottom: 24px; }
+        .tab-btn { flex: 1; background: transparent; border: none; color: #94a3b8; font-size: 11px; font-weight: 700; padding: 10px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active { background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; }
+        .input-group { position: relative; margin-bottom: 16px; text-align: left; }
+        .input-group label { display: block; font-size: 10px; font-weight: 700; color: #94a3b8; margin-bottom: 6px; }
+        .input-group input { width: 100%; background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; padding: 12px 40px; border-radius: 8px; outline: none; }
+        .input-group .icon-left { position: absolute; left: 14px; top: 32px; color: #64748b; }
+        .submit-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; padding: 10px; border-radius: 8px; margin-bottom: 16px; font-size: 12px; }
+        .alert-success { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16,185,129,0.4); color: #6ee7b7; padding: 10px; border-radius: 8px; margin-bottom: 16px; font-size: 12px; }
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
-  <div class="container">
 
-    <!-- Top Navbar -->
-    <div class="glass-card navbar">
-      <div class="brand">
-        <i class="fa-solid fa-bolt"></i> STRIVECAST
-      </div>
-      <div class="nav-right">
-        <div class="weather-pill" id="live-weather-pill">
-          <i class="fa-solid fa-cloud-sun"></i>
-          <span id="weather-text">Hyderabad: Fetching live telemetry...</span>
+    {% if session.get('user') %}
+    <!-- LOGGED IN DASHBOARD -->
+    <div class="container">
+        <nav class="navbar">
+            <div class="brand">
+                <i class="fa-solid fa-bolt"></i> STRIVECAST
+            </div>
+            <div class="user-panel">
+                <span><i class="fa-regular fa-user" style="color: #10b981;"></i> {{ session['user'] }}</span>
+                <a href="/logout" class="btn-logout">LOG OUT</a>
+            </div>
+        </nav>
+
+        <div class="nav-tabs">
+            <button class="nav-tab-btn active" onclick="switchView('advisor')"><i class="fa-solid fa-sliders"></i> Training Advisor</button>
+            <button class="nav-tab-btn" onclick="switchView('recovery')"><i class="fa-solid fa-spa"></i> AI Recovery Studio</button>
+            <button class="nav-tab-btn" onclick="switchView('history')"><i class="fa-solid fa-clock-rotate-left"></i> Activity History</button>
         </div>
+
+        <!-- 1. TRAINING ADVISOR VIEW -->
+        <div id="view-advisor">
+            <div class="layout-grid">
+                <div>
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fa-solid fa-sliders" style="color: #10b981;"></i> Training Telemetry
+                        </div>
+
+                        <div class="form-group">
+                            <label>Select Sport Discipline</label>
+                            <select id="sport">
+                                <option value="cycling" selected>Outdoor / Indoor Cycling</option>
+                                <option value="running">Running (Road / Track / Trail)</option>
+                                <option value="strength">Strength & Resistance</option>
+                                <option value="hiit">HIIT & Cardio</option>
+                                <option value="calisthenics">Calisthenics & Bodyweight</option>
+                                <option value="swimming">Swimming & Aquatics</option>
+                                <option value="combat">Combat Sports & Martial Arts</option>
+                                <option value="team_sports">Team & Field Sports</option>
+                                <option value="yoga">Yoga, Mobility & Pilates</option>
+                            </select>
+                        </div>
+
+                        <!-- Editable Temperature Input -->
+                        <div class="form-group">
+                            <label style="display: flex; justify-content: space-between;">
+                                <span>Temperature (°C)</span>
+                                <span style="color: #00f0ff; cursor: pointer;" onclick="syncLiveTemp()"><i class="fa-solid fa-rotate"></i> Reset to Live</span>
+                            </label>
+                            <input type="number" id="custom_temp" placeholder="Auto-fetching Hyderabad temp..." step="0.5">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Target Duration (Minutes)</label>
+                            <input type="number" id="duration" value="45" min="10" max="240">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Planned Intensity</label>
+                            <select id="intensity">
+                                <option value="Low">Low / Recovery</option>
+                                <option value="Moderate" selected>Moderate / Endurance</option>
+                                <option value="High">High / Threshold</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Fatigue Level (1-10)</label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="fatigue" min="1" max="10" value="3" oninput="document.getElementById('fatigue-val').innerText = this.value">
+                                <span id="fatigue-val" class="fatigue-val">3</span>
+                            </div>
+                        </div>
+
+                        <button class="btn-action" onclick="getAIAdvice()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> GENERATE AI ADVICE
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <!-- Hyderabad Live Weather Card -->
+                    <div class="card" style="padding: 16px;">
+                        <div class="weather-card">
+                            <div class="weather-info">
+                                <i class="fa-solid fa-cloud-sun weather-icon" id="w-icon"></i>
+                                <div>
+                                    <div class="weather-temp" id="w-temp">--°C</div>
+                                    <div class="weather-sub">Hyderabad • <span id="w-cond">Loading live weather...</span></div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="weather-badge" id="w-status">Live Data</span>
+                                <div class="weather-sub" style="margin-top: 6px;">Wind: <strong id="w-wind" style="color: #fff;">-- km/h</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metrics-row">
+                        <div class="metric-card">
+                            <div class="metric-label">Readiness Score</div>
+                            <div id="readiness-score" class="metric-value" style="color: #10b981;">73%</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Overexertion Risk</div>
+                            <div id="risk-badge" class="metric-value" style="color: #10b981;">Low</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div id="advice-output">
+                            <div class="advice-header">
+                                <i class="fa-solid fa-robot"></i> <span id="advice-title">Cycling Telemetry Advisory</span>
+                            </div>
+
+                            <div id="advice-pills">
+                                <span class="advice-pill" id="pill-stat">Target Cadence: 85 - 95 RPM</span>
+                                <span class="advice-pill" id="pill-hr">Zone 2-3 (Endurance)</span>
+                            </div>
+
+                            <p class="advice-text" id="advice-insight">
+                                Click <strong>Generate AI Advice</strong> to compute readiness scores and sport-specific training guidelines.
+                            </p>
+
+                            <div class="nutrition-box" id="advice-nutrition">
+                                <i class="fa-solid fa-apple-whole"></i> <strong>Nutrition & Recovery:</strong> Hydrate regularly based on intensity.
+                            </div>
+
+                            <div style="margin-top: 16px; display: flex; gap: 10px;">
+                                <button class="btn-action" style="background: rgba(0, 240, 255, 0.2); border: 1px solid rgba(0, 240, 255, 0.4); color: #38bdf8;" onclick="logCurrentSession()">
+                                    <i class="fa-solid fa-plus"></i> LOG WORKOUT TO HISTORY
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: #00f0ff;"></i> Target Heart Rate Distribution</div>
+                        <div style="height: 180px;">
+                            <canvas id="hrChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. AI RECOVERY STUDIO VIEW -->
+        <div id="view-recovery" class="hidden">
+            <div class="layout-grid">
+                <div>
+                    <div class="card">
+                        <div class="card-title">
+                            <i class="fa-solid fa-bed" style="color: #38bdf8;"></i> Recovery Parameters
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sleep Duration (Hours)</label>
+                            <input type="number" id="sleep_hours" value="7.5" step="0.5" min="3" max="12">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sleep Quality</label>
+                            <select id="sleep_quality">
+                                <option value="Poor">Poor / Restless</option>
+                                <option value="Average">Average</option>
+                                <option value="Good" selected>Good / Restorative</option>
+                                <option value="Excellent">Excellent</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Muscular Soreness (1-10)</label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="soreness" min="1" max="10" value="4" oninput="document.getElementById('soreness-val').innerText = this.value">
+                                <span id="soreness-val" class="fatigue-val">4</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>CNS Strain Level (1-10)</label>
+                            <div class="slider-wrapper">
+                                <input type="range" id="cns_strain" min="1" max="10" value="3" oninput="document.getElementById('cns-val').innerText = this.value">
+                                <span id="cns-val" class="fatigue-val">3</span>
+                            </div>
+                        </div>
+
+                        <button class="btn-action" style="background: linear-gradient(135deg, #0284c7, #0369a1);" onclick="getAIRecovery()">
+                            <i class="fa-solid fa-brain"></i> ANALYZE CNS RECOVERY
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="metrics-row">
+                        <div class="metric-card">
+                            <div class="metric-label">CNS Recovery Index</div>
+                            <div id="rec-score" class="metric-value" style="color: #10b981;">82%</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Recovery Status</div>
+                            <div id="rec-status" class="metric-value" style="font-size: 20px; color: #10b981;">Optimal</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="advice-header"><i class="fa-solid fa-notes-medical"></i> AI Active Recovery Protocol</div>
+                        <p class="advice-text" id="rec-protocol">
+                            Calculated CNS index indicates full neural readiness for intense training effort.
+                        </p>
+                        <div class="nutrition-box" id="rec-actions" style="background: rgba(2, 132, 199, 0.15); border-left-color: #38bdf8; color: #bae6fd;">
+                            <i class="fa-solid fa-list-check"></i> <strong>Recommended Actions:</strong> Dynamic mobility, standard hydration protocol.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. ACTIVITY HISTORY LOG VIEW -->
+        <div id="view-history" class="hidden">
+            <div class="card">
+                <div class="card-title" style="justify-content: space-between;">
+                    <span><i class="fa-solid fa-clock-rotate-left" style="color: #10b981;"></i> Session Log History</span>
+                    <button class="btn-action" style="width: auto; padding: 6px 14px; font-size: 11px;" onclick="fetchLogs()">
+                        <i class="fa-solid fa-rotate-right"></i> Refresh Logs
+                    </button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Sport Discipline</th>
+                                <th>Duration</th>
+                                <th>Intensity</th>
+                                <th>Readiness</th>
+                                <th>Risk Level</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: #94a3b8;">No workout logs recorded yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let hrChartInstance = null;
+        let liveHydTemp = 28.0;
+
+        function switchView(viewName) {
+            document.getElementById('view-advisor').classList.add('hidden');
+            document.getElementById('view-recovery').classList.add('hidden');
+            document.getElementById('view-history').classList.add('hidden');
+            
+            const btns = document.querySelectorAll('.nav-tab-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+
+            if (viewName === 'advisor') {
+                document.getElementById('view-advisor').classList.remove('hidden');
+                btns[0].classList.add('active');
+            } else if (viewName === 'recovery') {
+                document.getElementById('view-recovery').classList.remove('hidden');
+                btns[1].classList.add('active');
+            } else if (viewName === 'history') {
+                document.getElementById('view-history').classList.remove('hidden');
+                btns[2].classList.add('active');
+                fetchLogs();
+            }
+        }
+
+        async function fetchLiveWeather() {
+            try {
+                const res = await fetch('/api/weather');
+                const w = await res.json();
+                
+                document.getElementById('w-temp').innerText = w.temp;
+                document.getElementById('w-cond').innerText = w.condition;
+                document.getElementById('w-wind').innerText = w.wind;
+                document.getElementById('w-status').innerText = w.status;
+                
+                liveHydTemp = w.raw_temp;
+                
+                // Set editable temp input to live temperature if blank
+                const customInput = document.getElementById('custom_temp');
+                if (!customInput.value) {
+                    customInput.value = liveHydTemp;
+                }
+            } catch (e) {
+                console.error("Error fetching live weather:", e);
+            }
+        }
+
+        function syncLiveTemp() {
+            document.getElementById('custom_temp').value = liveHydTemp;
+            getAIAdvice();
+        }
+
+        async function getAIAdvice() {
+            const sport = document.getElementById('sport').value;
+            const custom_temp = document.getElementById('custom_temp').value;
+            const duration = document.getElementById('duration').value;
+            const intensity = document.getElementById('intensity').value;
+            const fatigue = document.getElementById('fatigue').value;
+
+            try {
+                const response = await fetch('/api/advisor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sport, custom_temp, duration, intensity, fatigue })
+                });
+
+                const data = await response.json();
+
+                document.getElementById('readiness-score').innerText = data.readiness_score;
+                const riskElem = document.getElementById('risk-badge');
+                riskElem.innerText = data.overexertion_risk;
+                riskElem.style.color = data.risk_color;
+
+                const advice = data.advice;
+                document.getElementById('advice-title').innerText = advice.title;
+                document.getElementById('pill-stat').innerText = `${advice.stat_label}: ${advice.stat_val}`;
+                document.getElementById('pill-hr').innerText = advice.hr_zone;
+                document.getElementById('advice-insight').innerText = advice.ai_insight;
+                document.getElementById('advice-nutrition').innerHTML = `<i class="fa-solid fa-apple-whole"></i> <strong>Nutrition & Recovery:</strong> ${advice.nutrition_tip}`;
+
+                renderHRChart(data.hr_zones);
+            } catch (err) {
+                console.error("Error fetching AI advice:", err);
+            }
+        }
+
+        async function getAIRecovery() {
+            const sleep_hours = document.getElementById('sleep_hours').value;
+            const sleep_quality = document.getElementById('sleep_quality').value;
+            const soreness = document.getElementById('soreness').value;
+            const cns_strain = document.getElementById('cns_strain').value;
+
+            try {
+                const res = await fetch('/api/recovery', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sleep_hours, sleep_quality, soreness, cns_strain })
+                });
+
+                const data = await res.json();
+                document.getElementById('rec-score').innerText = data.recovery_index;
+                const statusElem = document.getElementById('rec-status');
+                statusElem.innerText = data.status;
+                statusElem.style.color = data.status_color;
+                document.getElementById('rec-protocol').innerText = data.protocol;
+                document.getElementById('rec-actions').innerHTML = `<i class="fa-solid fa-list-check"></i> <strong>Recommended Actions:</strong> ${data.actions.join(' • ')}`;
+            } catch (e) {
+                console.error("Error fetching recovery:", e);
+            }
+        }
+
+        async function logCurrentSession() {
+            const sport = document.getElementById('sport').value;
+            const duration = document.getElementById('duration').value;
+            const intensity = document.getElementById('intensity').value;
+            const readiness = document.getElementById('readiness-score').innerText;
+            const risk = document.getElementById('risk-badge').innerText;
+
+            try {
+                const res = await fetch('/api/logs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sport, duration, intensity, readiness, risk, notes: "Logged via AI Advisor HUD" })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Workout session logged successfully!");
+                }
+            } catch (e) {
+                console.error("Error logging workout:", e);
+            }
+        }
+
+        async function fetchLogs() {
+            try {
+                const res = await fetch('/api/logs');
+                const data = await res.json();
+                const tbody = document.getElementById('history-tbody');
+                tbody.innerHTML = '';
+
+                if (!data.logs || data.logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #94a3b8;">No workout logs recorded yet.</td></tr>';
+                    return;
+                }
+
+                data.logs.forEach(log => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${log.date}</td>
+                        <td><strong>${log.sport}</strong></td>
+                        <td>${log.duration}</td>
+                        <td>${log.intensity}</td>
+                        <td><span style="color: #10b981; font-weight: 700;">${log.readiness}</span></td>
+                        <td><span style="color: ${log.risk === 'High' ? '#ef4444' : log.risk === 'Moderate' ? '#f59e0b' : '#10b981'}; font-weight: 700;">${log.risk}</span></td>
+                        <td>${log.notes}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Error fetching logs:", e);
+            }
+        }
+
+        function renderHRChart(zones) {
+            const ctx = document.getElementById('hrChart').getContext('2d');
+            if (hrChartInstance) hrChartInstance.destroy();
+
+            hrChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Zone 1 (Warmup)', 'Zone 2 (Base)', 'Zone 3 (Tempo)', 'Zone 4 (Threshold)', 'Zone 5 (Anaerobic)'],
+                    datasets: [{
+                        label: '% Time in HR Zone',
+                        data: zones || [15, 35, 30, 15, 5],
+                        backgroundColor: ['#38bdf8', '#10b981', '#f59e0b', '#f97316', '#ef4444'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        fetchLiveWeather().then(() => getAIAdvice());
+    </script>
+    <!-- ================= STRIVECAST WEIGHT, NUTRITION & HYDERABAD TRACKS ADD-ON ================= -->
+<style>
+  #sc-addon-wrapper {
+    max-width: 1150px;
+    margin: 24px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    color: #ffffff;
+  }
+  .sc-addon-card {
+    background: rgba(13, 22, 29, 0.78);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 16px;
+    padding: 22px 24px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  }
+  .sc-addon-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .sc-addon-header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 4px 0;
+  }
+  .sc-addon-header p {
+    font-size: 0.86rem;
+    color: rgba(255, 255, 255, 0.72);
+    margin: 0;
+  }
+  .sc-addon-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .sc-addon-field label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.82);
+    margin-bottom: 6px;
+  }
+  .sc-addon-field input,
+  .sc-addon-field select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: #ffffff;
+    font-size: 0.92rem;
+    outline: none;
+  }
+  .sc-addon-field select option {
+    background: #0f1b24;
+    color: #ffffff;
+  }
+  .sc-addon-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .sc-addon-subhead {
+    font-size: 0.88rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #10b981;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sc-addon-step {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid #38bdf8;
+    border-radius: 0 10px 10px 0;
+    padding: 11px 14px;
+    margin-bottom: 10px;
+  }
+  .sc-addon-step strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #7dd3fc;
+    margin-bottom: 3px;
+  }
+  .sc-addon-step p {
+    font-size: 0.84rem;
+    color: rgba(255, 255, 255, 0.82);
+    margin: 0;
+  }
+  .sc-addon-alert {
+    background: rgba(245, 158, 11, 0.13);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 0.83rem;
+    color: #fde68a;
+    margin-top: 10px;
+  }
+  .sc-addon-macros {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .sc-addon-macro-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+  .sc-addon-macro-box span {
+    display: block;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.65);
+    text-transform: uppercase;
+  }
+  .sc-addon-macro-box strong {
+    font-size: 1.15rem;
+    color: #34d399;
+  }
+  .sc-addon-meal {
+    background: rgba(16, 185, 129, 0.09);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 10px;
+    padding: 10px 13px;
+    margin-bottom: 9px;
+    font-size: 0.83rem;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .sc-addon-meal strong {
+    color: #6ee7b7;
+  }
+  .sc-hyd-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .sc-hyd-tab {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: rgba(255, 255, 255, 0.88);
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sc-hyd-tab.active {
+    background: linear-gradient(135deg, #0284c7, #10b981);
+    border-color: transparent;
+    color: #ffffff;
+  }
+  .sc-hyd-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 13px 15px;
+    margin-bottom: 10px;
+  }
+  .sc-hyd-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .sc-hyd-badge {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.18);
+    color: #7dd3fc;
+    white-space: nowrap;
+  }
+  .sc-hyd-item p {
+    font-size: 0.83rem;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0 0 8px 0;
+  }
+  .sc-hyd-pin-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #38bdf8;
+    text-decoration: none;
+  }
+  .sc-hyd-pin-link:hover {
+    text-decoration: underline;
+  }
+  .sc-hyd-map-cta {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .sc-hyd-map-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 12px 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+  }
+</style>
+
+<div id="sc-addon-wrapper">
+
+  <!-- Card 1: Body-Weight Low-Stress Starter & Nutrition Advisor -->
+  <div class="sc-addon-card">
+    <div class="sc-addon-header">
+      <div>
+        <h2><i class="fa-solid fa-weight-scale"></i> Weight-Based Safe Starter &amp; Nutrition Advisor</h2>
+        <p>Enter your current weight and sport to start training without stressing your body</p>
       </div>
     </div>
 
-    <!-- Athlete Input & Training Selector -->
-    <div class="glass-card">
-      <div class="section-header">
-        <div>
-          <h2><i class="fa-solid fa-sliders"></i> Personalize Your Training &amp; Recovery Blueprint</h2>
-          <p class="section-sub">Enter your current body weight and sport to get a safe, low-stress starter plan, nutrition targets, and local Hyderabad tracks</p>
-        </div>
+    <div class="sc-addon-controls">
+      <div class="sc-addon-field">
+        <label for="sc-addon-weight">Current Body Weight (kg)</label>
+        <input type="number" id="sc-addon-weight" value="68" min="30" max="220" step="0.5" oninput="updateScAddon()">
       </div>
-
-      <div class="input-grid">
-        <div class="form-group">
-          <label for="user-weight"><i class="fa-solid fa-weight-scale"></i> Current Body Weight (kg)</label>
-          <input type="number" id="user-weight" value="68" min="30" max="220" step="0.5" oninput="generateFullPlan()">
-        </div>
-
-        <div class="form-group">
-          <label for="sport-select"><i class="fa-solid fa-person-biking"></i> Choose Training / Sport</label>
-          <select id="sport-select" onchange="generateFullPlan()">
-            <option value="cycling" selected>Outdoor Cycling</option>
-            <option value="running">Running</option>
-            <option value="walking">Walking</option>
-            <option value="strength">Strength &amp; Gym Conditioning</option>
-            <option value="swimming">Swimming</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="experience-level"><i class="fa-solid fa-seedling"></i> Current Experience Level</label>
-          <select id="experience-level" onchange="generateFullPlan()">
-            <option value="beginner" selected>Beginner (Starting Without Strain)</option>
-            <option value="intermediate">Intermediate (Consistent Routine)</option>
-            <option value="advanced">Advanced (Performance Focus)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="sleep-hours"><i class="fa-solid fa-bed"></i> Last Night's Sleep (Hours)</label>
-          <input type="number" id="sleep-hours" value="7.5" min="3" max="12" step="0.5" oninput="generateFullPlan()">
-        </div>
+      <div class="sc-addon-field">
+        <label for="sc-addon-sport">Choose Training / Sport</label>
+        <select id="sc-addon-sport" onchange="updateScAddon()">
+          <option value="cycling" selected>Outdoor Cycling</option>
+          <option value="running">Running</option>
+          <option value="walking">Walking</option>
+          <option value="strength">Strength &amp; Gym</option>
+          <option value="swimming">Swimming</option>
+        </select>
       </div>
-
-      <button type="button" class="primary-btn" onclick="generateFullPlan()">
-        <i class="fa-solid fa-wand-magic-sparkles"></i> Update AI Protocol, Nutrition &amp; Local Routes
-      </button>
-    </div>
-
-    <!-- Telemetry KPI Strip -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-label"><i class="fa-solid fa-temperature-half"></i> Live Weather &amp; Humidity</div>
-        <div class="kpi-value" id="kpi-temp">27°C</div>
-        <div class="kpi-note" id="kpi-humidity">Humidity: 58% • Wind: 11 km/h</div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-label"><i class="fa-solid fa-fire-flame-curved"></i> Thermal Load Index</div>
-        <div class="kpi-value" id="kpi-thermal">Moderate</div>
-        <div class="kpi-note" id="kpi-thermal-note">Safe outdoor window before 9:00 AM</div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-label"><i class="fa-solid fa-brain"></i> CNS Recovery Score</div>
-        <div class="kpi-value" id="kpi-cns">86%</div>
-        <div class="kpi-note" id="kpi-cns-note">Optimal neuromuscular readiness</div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-label"><i class="fa-solid fa-droplet"></i> Daily Hydration Target</div>
-        <div class="kpi-value" id="kpi-water">2.7 L</div>
-        <div class="kpi-note" id="kpi-protein-mini">Daily Protein: 95g / day</div>
+      <div class="sc-addon-field">
+        <label for="sc-addon-level">Experience Level</label>
+        <select id="sc-addon-level" onchange="updateScAddon()">
+          <option value="beginner" selected>Beginner (Zero-Strain Start)</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
       </div>
     </div>
 
-    <!-- Safe Low-Stress Starting Protocol & Nutrition Plan -->
-    <div class="two-col-grid">
-      <!-- Left: Low-Stress Starter Protocol -->
-      <div class="glass-card" style="margin-bottom: 0;">
-        <div class="section-header">
-          <div>
-            <h2><i class="fa-solid fa-shield-heart"></i> Low-Stress Starting Protocol</h2>
-            <p class="section-sub" id="starter-subtitle">Tailored for 68 kg • Outdoor Cycling</p>
-          </div>
-        </div>
-        <div id="starter-steps-container"></div>
-        <div class="guardrail-box" id="body-stress-guardrail"></div>
+    <div class="sc-addon-grid-2">
+      <div>
+        <div class="sc-addon-subhead"><i class="fa-solid fa-shield-heart"></i> Low-Stress Starting Protocol</div>
+        <div id="sc-addon-steps"></div>
+        <div class="sc-addon-alert" id="sc-addon-guardrail"></div>
       </div>
 
-      <!-- Right: Nutrition & Hydration Blueprint -->
-      <div class="glass-card" style="margin-bottom: 0;">
-        <div class="section-header">
-          <div>
-            <h2><i class="fa-solid fa-bowl-food"></i> Nutrition &amp; Recovery Fuel</h2>
-            <p class="section-sub" id="nutrition-subtitle">Calculated from your body weight &amp; thermal load</p>
-          </div>
+      <div>
+        <div class="sc-addon-subhead"><i class="fa-solid fa-bowl-food"></i> Daily Nutrition &amp; Hydration Targets</div>
+        <div class="sc-addon-macros">
+          <div class="sc-addon-macro-box"><span>Daily Protein</span><strong id="sc-addon-pro">95 g</strong></div>
+          <div class="sc-addon-macro-box"><span>Daily Carbs</span><strong id="sc-addon-carb">245 g</strong></div>
+          <div class="sc-addon-macro-box"><span>Target Calories</span><strong id="sc-addon-cal">2,040 kcal</strong></div>
+          <div class="sc-addon-macro-box"><span>Water + Electrolytes</span><strong id="sc-addon-water">2.7 L</strong></div>
         </div>
-
-        <div class="macro-grid">
-          <div class="macro-box">
-            <span>Daily Protein</span>
-            <strong id="macro-protein">95 g</strong>
-          </div>
-          <div class="macro-box">
-            <span>Daily Carbs</span>
-            <strong id="macro-carbs">240 g</strong>
-          </div>
-          <div class="macro-box">
-            <span>Active Calories</span>
-            <strong id="macro-calories">2,150 kcal</strong>
-          </div>
-          <div class="macro-box">
-            <span>Water + Electrolytes</span>
-            <strong id="macro-water">2.7 L</strong>
-          </div>
-        </div>
-
-        <div id="nutrition-meals-container"></div>
+        <div id="sc-addon-meals"></div>
       </div>
     </div>
-
-    <!-- Hyderabad Tracks & Active Groups Explorer -->
-    <div class="glass-card hyd-card-border" id="sc-hyd-explorer">
-      <div class="section-header">
-        <div>
-          <h2><i class="fa-solid fa-map-location-dot"></i> <span id="sc-hyd-heading">Hyderabad Outdoor Cycling Tracks &amp; Groups</span></h2>
-          <p class="section-sub" id="sc-hyd-sub">Verified tracks &amp; active training communities across Hyderabad &amp; Secunderabad</p>
-        </div>
-        <div class="sc-hyd-tabs">
-          <button type="button" class="sc-hyd-tab active" data-sport="cycling" onclick="setHydSport('cycling')">
-            <i class="fa-solid fa-bicycle"></i> Cycling
-          </button>
-          <button type="button" class="sc-hyd-tab" data-sport="running" onclick="setHydSport('running')">
-            <i class="fa-solid fa-person-running"></i> Running
-          </button>
-          <button type="button" class="sc-hyd-tab" data-sport="walking" onclick="setHydSport('walking')">
-            <i class="fa-solid fa-person-walking"></i> Walking
-          </button>
-        </div>
-      </div>
-
-      <div class="two-col-grid" style="margin-bottom: 0;">
-        <div>
-          <div class="sc-hyd-section-title"><i class="fa-solid fa-route"></i> Recommended Hyderabad Tracks</div>
-          <div id="sc-hyd-tracks-list"></div>
-        </div>
-        <div>
-          <div class="sc-hyd-section-title"><i class="fa-solid fa-users"></i> Active Local Groups &amp; Clubs</div>
-          <div id="sc-hyd-groups-list"></div>
-        </div>
-      </div>
-
-      <div class="sc-hyd-map-cta">
-        <a id="sc-hyd-main-map-btn" class="sc-hyd-map-btn" href="https://www.google.com/maps/search/?api=1&query=cycling+tracks+in+Hyderabad" target="_blank" rel="noopener noreferrer">
-          <i class="fa-solid fa-location-arrow"></i>
-          <span id="sc-hyd-map-btn-text">Show All Cycling Tracks on Google Maps</span>
-          <i class="fa-solid fa-arrow-up-right-from-square"></i>
-        </a>
-      </div>
-    </div>
-
-    <!-- CNS Recovery & Workload Analytics Chart -->
-    <div class="glass-card">
-      <div class="section-header">
-        <div>
-          <h2><i class="fa-solid fa-chart-line"></i> Weekly CNS Readiness &amp; Training Load</h2>
-          <p class="section-sub">Track recovery balance to prevent overtraining and joint fatigue</p>
-        </div>
-      </div>
-
-      <div class="chart-wrapper">
-        <canvas id="recoveryChart"></canvas>
-      </div>
-
-      <div class="log-bar">
-        <button type="button" class="secondary-btn" onclick="logCompletedSession()">
-          <i class="fa-solid fa-plus"></i> Log Today's Low-Stress Session
-        </button>
-        <span class="section-sub" id="log-status-msg">Ready to log your next session.</span>
-      </div>
-    </div>
-
   </div>
 
-  <script>
-    // Global live weather state (defaults to pleasant Hyderabad telemetry, updated live via Open-Meteo)
-    let liveWeather = {
-      temp: 27,
-      humidity: 58,
-      wind: 11
-    };
+  <!-- Card 2: Hyderabad Tracks & Active Groups Explorer -->
+  <div class="sc-addon-card">
+    <div class="sc-addon-header">
+      <div>
+        <h2><i class="fa-solid fa-map-location-dot"></i> <span id="sc-hyd-heading">Hyderabad Outdoor Cycling Tracks &amp; Groups</span></h2>
+        <p id="sc-hyd-sub">Curated local tracks &amp; active training groups in Hyderabad &amp; Secunderabad</p>
+      </div>
+      <div class="sc-hyd-tabs">
+        <button type="button" class="sc-hyd-tab active" data-sport="cycling" onclick="setHydSport('cycling')">
+          <i class="fa-solid fa-bicycle"></i> Cycling
+        </button>
+        <button type="button" class="sc-hyd-tab" data-sport="running" onclick="setHydSport('running')">
+          <i class="fa-solid fa-person-running"></i> Running
+        </button>
+        <button type="button" class="sc-hyd-tab" data-sport="walking" onclick="setHydSport('walking')">
+          <i class="fa-solid fa-person-walking"></i> Walking
+        </button>
+      </div>
+    </div>
 
-    // Hyderabad Tracks & Active Communities Database
-    const hydFitnessData = {
-      cycling: {
-        heading: "Hyderabad Outdoor Cycling Tracks & Groups",
-        mapBtnText: "Show All Cycling Tracks on Google Maps",
-        mapAllUrl: "https://www.google.com/maps/search/?api=1&query=cycling+tracks+in+Hyderabad",
-        tracks: [
-          {
-            name: "Healthway Solar Roof Cycling Track (ORR)",
-            tag: "23 km • Dedicated",
-            desc: "India's first 23 km solar-roofed cycling highway along the Outer Ring Road (Nanakramguda – Narsingi – Kollur) with 24/7 lighting.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Healthway+Cycling+Track+Nanakramguda+Hyderabad"
-          },
-          {
-            name: "Pala Pitta Cycling Park (Kondapur)",
-            tag: "3 km • Forest Trail",
-            desc: "Shaded eco-park trail ideal for low-stress endurance rides, balance drills, and beginner sessions with bike rentals.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Pala+Pitta+Cycling+Park+Kondapur+Hyderabad"
-          },
-          {
-            name: "Secunderabad Cantonment & Parade Ground Loop",
-            tag: "Road • Low Traffic",
-            desc: "Wide, tree-lined avenues with smooth tarmac and low morning traffic—ideal for steady Zone-2 rides.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Secunderabad+Cantonment+Hyderabad"
-          },
-          {
-            name: "Necklace Road Waterfront Stretch",
-            tag: "Flat • Scenic",
-            desc: "Breezy lakeside stretch around Hussain Sagar, best ridden early in the morning before city traffic picks up.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Necklace+Road+Hyderabad"
-          }
-        ],
-        groups: [
-          {
-            name: "Hyderabad Bicycling Club (HBC)",
-            tag: "Gachibowli & Kompally",
-            desc: "One of India's largest cycling communities hosting daily morning rides, beginner clinics, and weekend endurance rides.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Hyderabad+Bicycling+Club+Gachibowli"
-          },
-          {
-            name: "Hyderabad Cyclists Group (HCG)",
-            tag: "City-Wide Chapters",
-            desc: "Active local group organizing structured weekend rides across Secunderabad, HITEC City, and Shamirpet routes.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Hyderabad+Cyclists+Group"
-          }
-        ]
-      },
-      running: {
-        heading: "Hyderabad Running Tracks & Active Run Clubs",
-        mapBtnText: "Show All Running Tracks on Google Maps",
-        mapAllUrl: "https://www.google.com/maps/search/?api=1&query=running+tracks+in+Hyderabad",
-        tracks: [
-          {
-            name: "KBR National Park Perimeter Loop (Jubilee Hills)",
-            tag: "5 km • Gravel & Trail",
-            desc: "Shaded 5 km rolling loop around KBR Park—soft gravel surface helps absorb stride impact while building endurance.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=KBR+National+Park+Walkway+Jubilee+Hills+Hyderabad"
-          },
-          {
-            name: "Necklace Road & Sanjeevaiah Park Loop",
-            tag: "9.5 km • Waterfront",
-            desc: "Flat lakeside path connecting Sanjeevaiah Park (2.6 km inner loop) and People's Plaza for controlled pace runs.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Sanjeevaiah+Park+Necklace+Road+Hyderabad"
-          },
-          {
-            name: "GMC Balayogi Athletic Stadium (Gachibowli)",
-            tag: "400m • Synthetic Track",
-            desc: "Cushioned athletic track ideal for form drills, walk-jog intervals, and controlled speed sessions.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=GMC+Balayogi+Athletic+Stadium+Gachibowli+Hyderabad"
-          },
-          {
-            name: "Botanical Garden Trail (Kondapur)",
-            tag: "Soft Surface • Shaded",
-            desc: "Low-impact dirt and paved forest pathways that reduce knee stress and lower thermal heat load.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Kotla+Vijayabhaskara+Reddy+Botanical+Garden+Hyderabad"
-          }
-        ],
-        groups: [
-          {
-            name: "Hyderabad Runners",
-            tag: "Multiple Chapters",
-            desc: "Free, beginner-friendly morning group runs across KBR Park, Secunderabad, Alwal, Botanical Garden, and Gachibowli.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Hyderabad+Runners+KBR+Park"
-          },
-          {
-            name: "Run'Rave & 365runclub Hyderabad",
-            tag: "Weekend Social Runs",
-            desc: "Community running clubs hosting welcoming Saturday/Sunday 5K–10K paced group runs across the city.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Jubilee+Hills+Hyderabad"
-          }
-        ]
-      },
-      walking: {
-        heading: "Hyderabad Walking Tracks & Morning Groups",
-        mapBtnText: "Show All Walking Tracks on Google Maps",
-        mapAllUrl: "https://www.google.com/maps/search/?api=1&query=walking+tracks+in+Hyderabad",
-        tracks: [
-          {
-            name: "KBR National Park Walkway (Jubilee Hills)",
-            tag: "5 km • Tree Canopy",
-            desc: "Well-maintained gravel and paved outer perimeter with dense shade and zero traffic stress.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=KBR+National+Park+Walkway+Hyderabad"
-          },
-          {
-            name: "Durgam Cheruvu Lakefront Promenade (Madhapur)",
-            tag: "Lakeside • Scenic",
-            desc: "Breezy waterfront walkway overlooking the cable-stayed bridge, ideal for sunrise and sunset brisk walks.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Durgam+Cheruvu+Park+Walkway+Hyderabad"
-          },
-          {
-            name: "Indira Park Walking Loop (Lower Tank Bund)",
-            tag: "2 km • Shaded Park",
-            desc: "Lush green inner walking paths with calm morning air and gentle terrain for joint-friendly conditioning.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Indira+Park+Hyderabad"
-          },
-          {
-            name: "Kapra Lake & Sainikpuri Boulevard Walk",
-            tag: "Secunderabad • Calm",
-            desc: "Peaceful lakeside stretch and quiet tree-lined residential avenues great for steady Zone-2 brisk walking.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Kapra+Lake+Sainikpuri+Secunderabad"
-          }
-        ],
-        groups: [
-          {
-            name: "Hyderabad Morning Walkers Clubs",
-            tag: "KBR, Indira & Secunderabad",
-            desc: "Active sunrise walking communities meeting daily between 5:45 AM and 7:30 AM across major parks and lakefronts.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Indira+Park+Walkers+Hyderabad"
-          },
-          {
-            name: "Hyderabad Runners (Walk-to-Run Batches)",
-            tag: "Zero-Stress Conditioning",
-            desc: "Guided brisk-walking and gradual stamina-building batches across Secunderabad, Tarnaka, KBR Park, and Gachibowli.",
-            mapUrl: "https://www.google.com/maps/search/?api=1&query=Secunderabad+Parade+Ground+Hyderabad"
-          }
-        ]
-      }
-    };
+    <div class="sc-addon-grid-2">
+      <div>
+        <div class="sc-addon-subhead"><i class="fa-solid fa-route"></i> Recommended Hyderabad Tracks</div>
+        <div id="sc-hyd-tracks-list"></div>
+      </div>
+      <div>
+        <div class="sc-addon-subhead"><i class="fa-solid fa-users"></i> Active Local Groups &amp; Clubs</div>
+        <div id="sc-hyd-groups-list"></div>
+      </div>
+    </div>
 
-    function setHydSport(sportKey) {
-      const data = hydFitnessData[sportKey];
-      if (!data) return;
+    <div class="sc-hyd-map-cta">
+      <a id="sc-hyd-main-map-btn" class="sc-hyd-map-btn" href="https://www.google.com/maps/search/?api=1&query=cycling+tracks+in+Hyderabad" target="_blank" rel="noopener noreferrer">
+        <i class="fa-solid fa-location-arrow"></i>
+        <span id="sc-hyd-map-btn-text">Show All Cycling Tracks on Google Maps</span>
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      </a>
+    </div>
+  </div>
 
-      document.getElementById("sc-hyd-heading").textContent = data.heading;
-      document.getElementById("sc-hyd-map-btn-text").textContent = data.mapBtnText;
-      document.getElementById("sc-hyd-main-map-btn").href = data.mapAllUrl;
+</div>
 
-      document.querySelectorAll(".sc-hyd-tab").forEach(btn => {
-        btn.classList.toggle("active", btn.getAttribute("data-sport") === sportKey);
-      });
-
-      document.getElementById("sc-hyd-tracks-list").innerHTML = data.tracks.map(t => `
-        <div class="sc-hyd-item">
-          <div class="sc-hyd-item-top">
-            <strong>${t.name}</strong>
-            <span class="sc-hyd-badge">${t.tag}</span>
-          </div>
-          <p>${t.desc}</p>
-          <a class="sc-hyd-pin-link" href="${t.mapUrl}" target="_blank" rel="noopener noreferrer">
-            <i class="fa-solid fa-location-dot"></i> Open in Google Maps
-          </a>
-        </div>
-      `).join("");
-
-      document.getElementById("sc-hyd-groups-list").innerHTML = data.groups.map(g => `
-        <div class="sc-hyd-item">
-          <div class="sc-hyd-item-top">
-            <strong>${g.name}</strong>
-            <span class="sc-hyd-badge">${g.tag}</span>
-          </div>
-          <p>${g.desc}</p>
-          <a class="sc-hyd-pin-link" href="${g.mapUrl}" target="_blank" rel="noopener noreferrer">
-            <i class="fa-solid fa-map-pin"></i> View Meetup Zone on Maps
-          </a>
-        </div>
-      `).join("");
+<script>
+  const hydFitnessData = {
+    cycling: {
+      heading: "Hyderabad Outdoor Cycling Tracks & Groups",
+      mapBtnText: "Show All Cycling Tracks on Google Maps",
+      mapAllUrl: "https://www.google.com/maps/search/?api=1&query=cycling+tracks+in+Hyderabad",
+      tracks: [
+        { name: "Healthway Solar Roof Cycling Track (ORR)", tag: "23 km • Dedicated", desc: "India's first 23 km solar-roofed cycling highway along the Outer Ring Road (Nanakramguda – Narsingi – Kollur) with 24/7 lighting.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Healthway+Cycling+Track+Nanakramguda+Hyderabad" },
+        { name: "Pala Pitta Cycling Park (Kondapur)", tag: "3 km • Forest Trail", desc: "Shaded eco-park trail ideal for steady endurance rides, balance drills, and beginner sessions with bike rentals.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Pala+Pitta+Cycling+Park+Kondapur+Hyderabad" },
+        { name: "Secunderabad Cantonment & Parade Ground Loop", tag: "Road • Low Traffic", desc: "Wide, tree-lined avenues with smooth tarmac and low early-morning traffic—ideal for Zone-2 rides.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Secunderabad+Cantonment+Hyderabad" },
+        { name: "Necklace Road Waterfront Stretch", tag: "Flat • Scenic", desc: "Breezy lakeside stretch around Hussain Sagar, best ridden at sunrise before traffic picks up.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Necklace+Road+Hyderabad" }
+      ],
+      groups: [
+        { name: "Hyderabad Bicycling Club (HBC)", tag: "Gachibowli & Kompally", desc: "Active cycling community organizing daily morning rides, beginner clinics, and weekend endurance rides.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Hyderabad+Bicycling+Club+Gachibowli" },
+        { name: "Hyderabad Cyclists Group (HCG)", tag: "City-Wide Chapters", desc: "Local group hosting structured weekend rides across Secunderabad, HITEC City, and Shamirpet routes.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Hyderabad+Cyclists+Group" }
+      ]
+    },
+    running: {
+      heading: "Hyderabad Running Tracks & Active Run Clubs",
+      mapBtnText: "Show All Running Tracks on Google Maps",
+      mapAllUrl: "https://www.google.com/maps/search/?api=1&query=running+tracks+in+Hyderabad",
+      tracks: [
+        { name: "KBR National Park Perimeter Loop (Jubilee Hills)", tag: "5 km • Gravel Trail", desc: "Shaded 5 km rolling loop around KBR Park—soft gravel surface helps absorb stride impact while building stamina.", mapUrl: "https://www.google.com/maps/search/?api=1&query=KBR+National+Park+Walkway+Jubilee+Hills+Hyderabad" },
+        { name: "Necklace Road & Sanjeevaiah Park Loop", tag: "9.5 km • Waterfront", desc: "Flat lakeside path connecting Sanjeevaiah Park (2.6 km inner loop) and People's Plaza for controlled pace runs.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Sanjeevaiah+Park+Necklace+Road+Hyderabad" },
+        { name: "GMC Balayogi Athletic Stadium (Gachibowli)", tag: "400m • Synthetic Track", desc: "Cushioned athletic track ideal for form drills, walk-jog intervals, and controlled speed sessions.", mapUrl: "https://www.google.com/maps/search/?api=1&query=GMC+Balayogi+Athletic+Stadium+Gachibowli+Hyderabad" },
+        { name: "Botanical Garden Trail (Kondapur)", tag: "Soft Surface • Shaded", desc: "Low-impact dirt and paved forest pathways that reduce knee stress and lower heat load.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Kotla+Vijayabhaskara+Reddy+Botanical+Garden+Hyderabad" }
+      ],
+      groups: [
+        { name: "Hyderabad Runners", tag: "Multiple Chapters", desc: "Free, beginner-friendly morning group runs across KBR Park, Secunderabad, Alwal, Botanical Garden, and Gachibowli.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Hyderabad+Runners+KBR+Park" },
+        { name: "Run'Rave & 365runclub Hyderabad", tag: "Weekend Social Runs", desc: "Community running clubs hosting welcoming Saturday/Sunday 5K–10K paced group runs across the city.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Jubilee+Hills+Hyderabad" }
+      ]
+    },
+    walking: {
+      heading: "Hyderabad Walking Tracks & Morning Groups",
+      mapBtnText: "Show All Walking Tracks on Google Maps",
+      mapAllUrl: "https://www.google.com/maps/search/?api=1&query=walking+tracks+in+Hyderabad",
+      tracks: [
+        { name: "KBR National Park Walkway (Jubilee Hills)", tag: "5 km • Tree Canopy", desc: "Well-maintained gravel and paved outer perimeter with dense shade and zero traffic stress.", mapUrl: "https://www.google.com/maps/search/?api=1&query=KBR+National+Park+Walkway+Hyderabad" },
+        { name: "Durgam Cheruvu Lakefront Promenade (Madhapur)", tag: "Lakeside • Scenic", desc: "Breezy waterfront walkway overlooking the cable-stayed bridge, ideal for sunrise and sunset brisk walks.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Durgam+Cheruvu+Park+Walkway+Hyderabad" },
+        { name: "Indira Park Walking Loop (Lower Tank Bund)", tag: "2 km • Shaded Park", desc: "Lush green inner walking paths with calm morning air for joint-friendly conditioning.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Indira+Park+Hyderabad" },
+        { name: "Kapra Lake & Sainikpuri Boulevard Walk", tag: "Secunderabad • Calm", desc: "Peaceful lakeside stretch and quiet tree-lined residential avenues great for steady Zone-2 brisk walking.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Kapra+Lake+Sainikpuri+Secunderabad" }
+      ],
+      groups: [
+        { name: "Hyderabad Morning Walkers Clubs", tag: "KBR, Indira & Secunderabad", desc: "Active sunrise walking communities meeting daily between 5:45 AM and 7:30 AM across major parks and lakefronts.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Indira+Park+Walkers+Hyderabad" },
+        { name: "Hyderabad Runners (Walk-to-Run Batches)", tag: "Zero-Stress Conditioning", desc: "Guided brisk-walking and gradual stamina-building batches across Secunderabad, Tarnaka, KBR Park, and Gachibowli.", mapUrl: "https://www.google.com/maps/search/?api=1&query=Secunderabad+Parade+Ground+Hyderabad" }
+      ]
     }
+  };
 
-    // Core Weight + Sport + Weather Advisor Engine
-    function generateFullPlan() {
-      const weightInput = parseFloat(document.getElementById("user-weight").value);
-      const weight = (!isNaN(weightInput) && weightInput >= 30 && weightInput <= 220) ? weightInput : 68;
-      const sport = document.getElementById("sport-select").value;
-      const level = document.getElementById("experience-level").value;
-      const sleep = parseFloat(document.getElementById("sleep-hours").value) || 7.5;
-
-      // Sync Hyderabad Explorer Tab
-      if (sport === "cycling" || sport === "running" || sport === "walking") {
-        setHydSport(sport);
-        document.getElementById("sc-hyd-sub").textContent = "Verified tracks & active training communities across Hyderabad & Secunderabad";
-      } else {
-        setHydSport("walking");
-        document.getElementById("sc-hyd-sub").textContent = "Recommended active-recovery outdoor parks & walking loops in Hyderabad";
-      }
-
-      // Calculate CNS Readiness & Thermal Load
-      const cnsScore = Math.min(98, Math.max(48, Math.round((sleep / 8) * 88 + (level === "advanced" ? 5 : 0))));
-      const isHot = liveWeather.temp >= 31 || liveWeather.humidity >= 75;
-      const thermalLabel = isHot ? "High Heat Stress" : (liveWeather.temp >= 26 ? "Moderate" : "Optimal / Low");
-      const thermalBonusLiters = isHot ? 0.6 : 0.3;
-
-      document.getElementById("kpi-thermal").textContent = thermalLabel;
-      document.getElementById("kpi-thermal-note").textContent = isHot
-        ? "Train before 8:00 AM & add electrolytes"
-        : "Comfortable outdoor window for steady training";
-      document.getElementById("kpi-cns").textContent = `${cnsScore}%`;
-      document.getElementById("kpi-cns-note").textContent = cnsScore >= 75
-        ? "Cleared for progressive low-stress session"
-        : "Prioritize gentle mobility & extra sleep tonight";
-
-      // Calculate Nutrition & Hydration from Weight
-      const proteinFactor = sport === "strength" ? 1.6 : (sport === "running" || sport === "cycling" ? 1.4 : 1.2);
-      const carbFactor = (sport === "running" || sport === "cycling") ? 3.6 : 3.0;
-      const calorieFactor = level === "beginner" ? 30 : (level === "intermediate" ? 33 : 36);
-
-      const proteinGrams = Math.round(weight * proteinFactor);
-      const carbGrams = Math.round(weight * carbFactor);
-      const calories = Math.round(weight * calorieFactor);
-      const waterLiters = ((weight * 0.035) + thermalBonusLiters).toFixed(1);
-
-      document.getElementById("kpi-water").textContent = `${waterLiters} L`;
-      document.getElementById("kpi-protein-mini").textContent = `Daily Protein: ${proteinGrams}g / day`;
-      document.getElementById("macro-protein").textContent = `${proteinGrams} g`;
-      document.getElementById("macro-carbs").textContent = `${carbGrams} g`;
-      document.getElementById("macro-calories").textContent = `${calories.toLocaleString()} kcal`;
-      document.getElementById("macro-water").textContent = `${waterLiters} L`;
-
-      // Sport Name Mapping
-      const sportNames = {
-        cycling: "Outdoor Cycling",
-        running: "Running",
-        walking: "Brisk Walking",
-        strength: "Strength & Gym Conditioning",
-        swimming: "Swimming"
-      };
-      document.getElementById("starter-subtitle").textContent = `Tailored for ${weight} kg • ${sportNames[sport]} (${level})`;
-      document.getElementById("nutrition-subtitle").textContent = `Calculated for ${weight} kg body weight at ${liveWeather.temp}°C ambient temp`;
-
-      // Build Low-Stress Starting Protocol
-      const heavyJointNote = weight >= 82;
-      let steps = [];
-      let guardrail = "";
-
-      if (sport === "cycling") {
-        steps = [
-          {
-            title: "1. Joint-Safe Bike Fit & Warm-Up (5–8 Mins)",
-            desc: "Adjust saddle height so your knee keeps a slight 25–30° bend at the bottom of the pedal stroke. Start in an easy gear for 5 minutes."
-          },
-          {
-            title: level === "beginner" ? "2. Zone-2 Cadence Building (20–30 Mins)" : "2. Steady Aerobic Tempo (40–55 Mins)",
-            desc: level === "beginner"
-              ? "Spin smoothly at 75–85 RPM on flat routes (like Necklace Road or ORR Track). Keep effort conversational—no heavy gear mashing."
-              : "Hold steady 85–90 RPM cadence with controlled breathing, keeping heart rate in Zone 2–3."
-          },
-          {
-            title: "3. Cool-Down & Lower-Back Release (5 Mins)",
-            desc: "Coast in your easiest gear for the final 3 minutes, followed by gentle hamstring, quad, and hip-flexor stretches."
-          }
-        ];
-        guardrail = heavyJointNote
-          ? `Weight Guardrail (${weight} kg): Cycling is ideal because the saddle supports ~70% of your body weight, protecting your knees and ankles while building strong cardiovascular fitness.`
-          : `Body Stress Guardrail (${weight} kg): Avoid heavy high-gear climbs during your first 2 weeks—let tendons adapt through smooth spinning first.`;
-      } else if (sport === "running") {
-        steps = [
-          {
-            title: "1. Dynamic Joint Prep (6 Mins)",
-            desc: "Perform ankle circles, leg swings, calf raises, and 3 minutes of brisk walking before taking your first running stride."
-          },
-          {
-            title: (level === "beginner" || heavyJointNote) ? "2. Low-Impact Walk-Jog Intervals (20–25 Mins)" : "2. Controlled Aerobic Run (30–45 Mins)",
-            desc: (level === "beginner" || heavyJointNote)
-              ? "Alternate 3 minutes of brisk walking with 1 minute of slow, light jogging (repeat 5x) on soft gravel like KBR Park to absorb ground impact."
-              : "Run at a relaxed conversational pace (Zone 2) with quick, light steps (165–175 spm) rather than heavy overstriding."
-          },
-          {
-            title: "3. Walk-Down & Calf Recovery (5 Mins)",
-            desc: "Finish with a 4-minute slow walk so heart rate drops gradually, followed by gentle calf and ankle mobility."
-          }
-        ];
-        guardrail = heavyJointNote
-          ? `Joint Protection Alert (${weight} kg): Running creates ~2.5x body weight (${Math.round(weight * 2.5)} kg) of impact per step. Stick to walk-jog intervals on soft park trails for the first 3 weeks.`
-          : `Body Stress Guardrail (${weight} kg): Follow the 10% rule—never increase your weekly running distance by more than 10% to prevent shin splints.`;
-      } else if (sport === "walking") {
-        steps = [
-          {
-            title: "1. Posture & Ankle Mobilization (4 Mins)",
-            desc: "Stand tall with relaxed shoulders, roll ankles 10 times each side, and start at an easy stroll for the first 4 minutes."
-          },
-          {
-            title: "2. Progressive Brisk Zone-2 Walk (30–45 Mins)",
-            desc: "Build up to a purposeful brisk pace (5.0–6.0 km/h) swinging arms naturally. You should feel warm while still able to speak in full sentences."
-          },
-          {
-            title: "3. Gradual Taper & Hydration (5 Mins)",
-            desc: "Slow down for the final 3 minutes and drink 250–300 ml of water immediately post-walk."
-          }
-        ];
-        guardrail = `Zero-Strain Advantage (${weight} kg): Brisk walking burns steady fat and strengthens joints with minimal cortisol spike—ideal for daily consistency.`;
-      } else if (sport === "strength") {
-        steps = [
-          {
-            title: "1. Mobility & Light Activation (7 Mins)",
-            desc: "Warm up shoulders, hips, and thoracic spine with bodyweight squats, cat-cow stretches, and light band/arm rotations."
-          },
-          {
-            title: "2. Controlled Compound Movements (30–40 Mins)",
-            desc: "Focus on 3 sets of 10–12 reps using moderate weights (leave 2–3 reps in reserve—never train to failure in your starting phase)."
-          },
-          {
-            title: "3. Deep Breathing & Decompression (5 Mins)",
-            desc: "Finish with slow nasal breathing and light stretching to calm the Central Nervous System."
-          }
-        ];
-        guardrail = `CNS & Tendon Guardrail (${weight} kg): Muscles adapt faster than tendons—keep loads moderate for the first 2 weeks and rest 48 hours between heavy lower-body days.`;
-      } else {
-        steps = [
-          {
-            title: "1. Shoulder & Breath Warm-Up (5 Mins)",
-            desc: "Perform arm circles and 2 slow, relaxed laps focusing on smooth exhale bubbles underwater."
-          },
-          {
-            title: "2. Low-Stress Lap Intervals (20–30 Mins)",
-            desc: "Swim 2–4 lengths at an easy pace, rest 30–45 seconds at the wall, and focus on gliding efficiency over speed."
-          },
-          {
-            title: "3. Easy Backstroke Cool-Down (4 Mins)",
-            desc: "Finish with 2 slow laps to decompress the spine and shoulders."
-          }
-        ];
-        guardrail = `Zero-Impact Guardrail (${weight} kg): Water supports ~90% of body weight, making swimming the lowest-stress full-body workout possible.`;
-      }
-
-      document.getElementById("starter-steps-container").innerHTML = steps.map(s => `
-        <div class="protocol-step">
-          <strong>${s.title}</strong>
-          <p>${s.desc}</p>
-        </div>
-      `).join("");
-
-      document.getElementById("body-stress-guardrail").innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${guardrail}`;
-
-      // Build Nutrition & Meal Timing Guidance
-      const preWorkoutCarbs = Math.round(weight * 0.5);
-      const postWorkoutProtein = Math.round(weight * 0.35);
-
-      document.getElementById("nutrition-meals-container").innerHTML = `
-        <div class="meal-tip">
-          <strong><i class="fa-solid fa-bolt"></i> Pre-Training Fuel (45–60 mins before):</strong>
-          Aim for ~${preWorkoutCarbs}g light digestible carbs for steady energy without stomach heaviness (e.g., 1 ripe banana + 5–6 soaked almonds, or a small bowl of oats/poha).
-        </div>
-        <div class="meal-tip">
-          <strong><i class="fa-solid fa-utensils"></i> Post-Training Recovery Meal (Within 60 mins):</strong>
-          Target ~${postWorkoutProtein}g quality protein + complex carbs to repair muscle fibers (e.g., paneer/tofu bhurji or thick dal/chana bowl with roti/rice + curd).
-        </div>
-        <div class="meal-tip" style="margin-bottom: 0;">
-          <strong><i class="fa-solid fa-glass-water"></i> Hyderabad Heat &amp; Electrolyte Rule:</strong>
-          Drink 500 ml water 1 hour before heading out, sip every 20 minutes during training, and add a pinch of rock salt + lemon juice if sweating heavily.
-        </div>
-      `;
-    }
-
-    // Fetch Live Weather for Hyderabad (Free Open-Meteo API - No API Key Needed)
-    async function fetchHyderabadWeather() {
-      try {
-        const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=17.3850&longitude=78.4867&current=temperature_2m,relative_humidity_2m,wind_speed_10m");
-        const data = await res.json();
-        if (data && data.current) {
-          liveWeather.temp = Math.round(data.current.temperature_2m);
-          liveWeather.humidity = Math.round(data.current.relative_humidity_2m);
-          liveWeather.wind = Math.round(data.current.wind_speed_10m);
-        }
-      } catch (err) {
-        // Keeps reliable fallback telemetry if offline
-      }
-
-      document.getElementById("weather-text").textContent =
-        `Hyderabad: ${liveWeather.temp}°C • ${liveWeather.humidity}% Humidity • ${liveWeather.wind} km/h Wind`;
-      document.getElementById("kpi-temp").textContent = `${liveWeather.temp}°C`;
-      document.getElementById("kpi-humidity").textContent = `Humidity: ${liveWeather.humidity}% • Wind: ${liveWeather.wind} km/h`;
-
-      generateFullPlan();
-    }
-
-    // Chart.js CNS Readiness & Load Graph
-    let recoveryChartInstance = null;
-
-    function initChart() {
-      const ctx = document.getElementById("recoveryChart").getContext("2d");
-      recoveryChartInstance = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Today"],
-          datasets: [
-            {
-              label: "CNS Recovery Score (%)",
-              data: [82, 85, 79, 88, 84, 90, 86],
-              borderColor: "#38bdf8",
-              backgroundColor: "rgba(56, 189, 248, 0.15)",
-              borderWidth: 3,
-              tension: 0.35,
-              fill: true
-            },
-            {
-              label: "Training Strain Index",
-              data: [45, 52, 60, 42, 55, 38, 48],
-              borderColor: "#10b981",
-              backgroundColor: "rgba(16, 185, 129, 0.1)",
-              borderWidth: 2,
-              borderDash: [5, 5],
-              tension: 0.35,
-              fill: false
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              labels: { color: "#e2e8f0", font: { size: 12 } }
-            }
-          },
-          scales: {
-            x: {
-              ticks: { color: "#94a3b8" },
-              grid: { color: "rgba(255,255,255,0.06)" }
-            },
-            y: {
-              min: 0,
-              max: 100,
-              ticks: { color: "#94a3b8" },
-              grid: { color: "rgba(255,255,255,0.06)" }
-            }
-          }
-        }
-      });
-    }
-
-    function logCompletedSession() {
-      if (!recoveryChartInstance) return;
-      const sportText = document.getElementById("sport-select").options[document.getElementById("sport-select").selectedIndex].text;
-      const weight = document.getElementById("user-weight").value || 68;
-
-      const strainData = recoveryChartInstance.data.datasets[1].data;
-      strainData[strainData.length - 1] = Math.min(85, strainData[strainData.length - 1] + 10);
-      recoveryChartInstance.update();
-
-      document.getElementById("log-status-msg").textContent =
-        `Logged low-stress ${sportText} session (${weight} kg baseline) — Strain & recovery updated!`;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      initChart();
-      setHydSport("cycling");
-      generateFullPlan();
-      fetchHyderabadWeather();
+  function setHydSport(sportKey) {
+    const data = hydFitnessData[sportKey];
+    if (!data) return;
+    document.getElementById("sc-hyd-heading").textContent = data.heading;
+    document.getElementById("sc-hyd-map-btn-text").textContent = data.mapBtnText;
+    document.getElementById("sc-hyd-main-map-btn").href = data.mapAllUrl;
+    document.querySelectorAll(".sc-hyd-tab").forEach(btn => {
+      btn.classList.toggle("active", btn.getAttribute("data-sport") === sportKey);
     });
-  </script>
+    document.getElementById("sc-hyd-tracks-list").innerHTML = data.tracks.map(t => `
+      <div class="sc-hyd-item">
+        <div class="sc-hyd-item-top"><strong>${t.name}</strong><span class="sc-hyd-badge">${t.tag}</span></div>
+        <p>${t.desc}</p>
+        <a class="sc-hyd-pin-link" href="${t.mapUrl}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-location-dot"></i> Open in Google Maps</a>
+      </div>`).join("");
+    document.getElementById("sc-hyd-groups-list").innerHTML = data.groups.map(g => `
+      <div class="sc-hyd-item">
+        <div class="sc-hyd-item-top"><strong>${g.name}</strong><span class="sc-hyd-badge">${g.tag}</span></div>
+        <p>${g.desc}</p>
+        <a class="sc-hyd-pin-link" href="${g.mapUrl}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-map-pin"></i> View Meetup Zone on Maps</a>
+      </div>`).join("");
+  }
+
+  function updateScAddon() {
+    const w = parseFloat(document.getElementById("sc-addon-weight").value) || 68;
+    const sport = document.getElementById("sc-addon-sport").value;
+    const level = document.getElementById("sc-addon-level").value;
+
+    if (sport === "cycling" || sport === "running" || sport === "walking") {
+      setHydSport(sport);
+    } else {
+      setHydSport("walking");
+    }
+
+    const pro = Math.round(w * (sport === "strength" ? 1.6 : (sport === "running" || sport === "cycling" ? 1.4 : 1.2)));
+    const carb = Math.round(w * ((sport === "running" || sport === "cycling") ? 3.6 : 3.0));
+    const cal = Math.round(w * (level === "beginner" ? 30 : (level === "intermediate" ? 33 : 36)));
+    const water = ((w * 0.035) + 0.4).toFixed(1);
+
+    document.getElementById("sc-addon-pro").textContent = `${pro} g`;
+    document.getElementById("sc-addon-carb").textContent = `${carb} g`;
+    document.getElementById("sc-addon-cal").textContent = `${cal.toLocaleString()} kcal`;
+    document.getElementById("sc-addon-water").textContent = `${water} L`;
+
+    const heavyJoint = w >= 82;
+    let steps = [];
+    let guardrail = "";
+
+    if (sport === "cycling") {
+      steps = [
+        { title: "1. Bike Fit & Easy Spin Warm-Up (5–8 Mins)", desc: "Keep a slight 25–30° knee bend at the bottom of the pedal stroke and warm up in an easy gear." },
+        { title: level === "beginner" ? "2. Zone-2 Cadence Building (20–30 Mins)" : "2. Steady Aerobic Tempo (40–55 Mins)", desc: "Spin smoothly at 75–85 RPM on flat roads without pushing heavy gears." },
+        { title: "3. Easy Coast & Hip Stretch (5 Mins)", desc: "Spin lightly for 3 minutes, then stretch hamstrings and hip flexors." }
+      ];
+      guardrail = `Joint Advantage (${w} kg): The saddle supports ~70% of your body weight, protecting knees and ankles while building cardio endurance.`;
+    } else if (sport === "running") {
+      steps = [
+        { title: "1. Ankle & Hip Dynamic Warm-Up (6 Mins)", desc: "Ankle rolls, leg swings, calf raises, and 3 minutes of brisk walking before jogging." },
+        { title: (level === "beginner" || heavyJoint) ? "2. Low-Impact Walk-Jog Intervals (20–25 Mins)" : "2. Controlled Aerobic Run (30–45 Mins)", desc: "Alternate 3 mins brisk walk + 1 min light jog on soft gravel (like KBR Park) to minimize joint shock." },
+        { title: "3. Gradual Walk-Down (5 Mins)", desc: "Walk slowly for 4 minutes to lower heart rate safely." }
+      ];
+      guardrail = heavyJoint
+        ? `Joint Protection Alert (${w} kg): Running creates ~${Math.round(w * 2.5)} kg of impact per step. Stick to walk-jog intervals on soft park trails for your first 3 weeks.`
+        : `Body Stress Rule (${w} kg): Never increase weekly running distance by more than 10% to prevent shin splints.`;
+    } else if (sport === "walking") {
+      steps = [
+        { title: "1. Posture & Ankle Prep (4 Mins)", desc: "Start at an easy stroll with relaxed shoulders for the first 4 minutes." },
+        { title: "2. Brisk Zone-2 Walk (30–45 Mins)", desc: "Walk at a steady, purposeful pace where you feel warm but can still speak comfortably." },
+        { title: "3. Taper & Rehydrate (5 Mins)", desc: "Slow down for the final 3 minutes and drink 250 ml water." }
+      ];
+      guardrail = `Zero-Strain Start (${w} kg): Brisk walking builds stamina and burns fat without spiking stress hormones or straining joints.`;
+    } else if (sport === "strength") {
+      steps = [
+        { title: "1. Joint Mobility Warm-Up (7 Mins)", desc: "Bodyweight squats, arm circles, and thoracic twists before touching weights." },
+        { title: "2. Controlled Sets (30–40 Mins)", desc: "3 sets of 10–12 reps with moderate weight—always leave 2–3 reps in reserve (never train to failure early on)." },
+        { title: "3. Deep Breathing Cool-Down (5 Mins)", desc: "Slow nasal breathing and light stretching to calm the nervous system." }
+      ];
+      guardrail = `Tendon Guardrail (${w} kg): Tendons adapt slower than muscles—keep weights moderate for your first 2 weeks.`;
+    } else {
+      steps = [
+        { title: "1. Shoulder & Breath Warm-Up (5 Mins)", desc: "Arm circles and 2 slow, relaxed laps focusing on smooth underwater exhales." },
+        { title: "2. Easy Lap Intervals (20–30 Mins)", desc: "Swim 2–4 lengths at an easy pace and rest 30–45 seconds at the wall." },
+        { title: "3. Relaxed Cool-Down (4 Mins)", desc: "Finish with 2 slow laps to decompress the spine." }
+      ];
+      guardrail = `Zero-Impact Guardrail (${w} kg): Water supports ~90% of body weight for stress-free full-body conditioning.`;
+    }
+
+    document.getElementById("sc-addon-steps").innerHTML = steps.map(s => `
+      <div class="sc-addon-step"><strong>${s.title}</strong><p>${s.desc}</p></div>`).join("");
+    document.getElementById("sc-addon-guardrail").innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${guardrail}`;
+
+    document.getElementById("sc-addon-meals").innerHTML = `
+      <div class="sc-addon-meal"><strong>Pre-Training (45–60 mins before):</strong> ~${Math.round(w * 0.5)}g light carbs (e.g., 1 banana + soaked almonds or small bowl of oats/poha) for steady energy without heaviness.</div>
+      <div class="sc-addon-meal"><strong>Post-Training Recovery (Within 60 mins):</strong> ~${Math.round(w * 0.35)}g quality protein + complex carbs (e.g., paneer/tofu bhurji or thick dal/chana bowl with roti/rice + curd).</div>
+      <div class="sc-addon-meal" style="margin-bottom:0;"><strong>Hydration Rule:</strong> Drink 500 ml water 1 hour before training and sip every 20 minutes with a pinch of rock salt + lemon in warm weather.</div>
+    `;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    setHydSport("cycling");
+    updateScAddon();
+  });
+</script>
+<!-- ================= END STRIVECAST ADD-ON ================= --> 
+    {% else %}
+    <!-- AUTHENTICATION VIEW -->
+    <div class="auth-container">
+        <div class="auth-box">
+            <div style="color: #00f0ff; font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px;">
+                <i class="fa-solid fa-bolt"></i> FITNESS AI SECURITY HUD
+            </div>
+            <h2>Athlete Portal Access</h2>
+            <p>AI-Driven Overexertion Prevention Engine</p>
+
+            {% if error %}<div class="alert-error">{{ error }}</div>{% endif %}
+            {% if success %}<div class="alert-success">{{ success }}</div>{% endif %}
+
+            <div class="auth-tabs">
+                <button id="tab-login" class="tab-btn" onclick="switchAuthTab('login')">LOG IN</button>
+                <button id="tab-register" class="tab-btn" onclick="switchAuthTab('register')">CREATE ACCOUNT</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="form-login" action="/login" method="POST">
+                <div class="input-group">
+                    <label>EMAIL</label>
+                    <i class="fa-regular fa-envelope icon-left"></i>
+                    <input type="email" name="email" placeholder="name@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label>PASSWORD</label>
+                    <i class="fa-solid fa-lock icon-left"></i>
+                    <input type="password" id="login-pass" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="submit-btn">LOG IN</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="form-register" action="/register" method="POST" class="hidden">
+                <div class="input-group">
+                    <label>EMAIL</label>
+                    <i class="fa-regular fa-envelope icon-left"></i>
+                    <input type="email" name="email" placeholder="name@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label>CREATE PASSWORD</label>
+                    <i class="fa-solid fa-lock icon-left"></i>
+                    <input type="password" id="reg-pass" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="submit-btn">CREATE ACCOUNT</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const activeTab = "{{ active_tab|default('login') }}";
+        
+        function switchAuthTab(tab) {
+            if (tab === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-register').classList.add('hidden');
+                document.getElementById('tab-login').classList.add('active');
+                document.getElementById('tab-register').classList.remove('active');
+            } else {
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-register').classList.remove('hidden');
+                document.getElementById('tab-login').classList.remove('active');
+                document.getElementById('tab-register').classList.add('active');
+            }
+        }
+
+        switchAuthTab(activeTab);
+    </script>
+    {% endif %}
+
 </body>
 </html>
